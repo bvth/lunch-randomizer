@@ -1,9 +1,9 @@
-import  { useState, useEffect } from "react";
+import  React, { useState, useEffect } from "react";
 import { options } from "../rapidapi_options";
 import axios from "axios";
 
-export default function Randomizer (props) {
-    const [restaurantList, setRestaurantList] = useState([1,2,3,4,5,6,7,8,9]);
+export default function Randomizer () {
+    const [restaurantList, setRestaurantList] = useState<any[]>([]);
 
     useEffect(() => {
         axios({
@@ -13,7 +13,6 @@ export default function Randomizer (props) {
                 latitude: '60.1667969',
                 longitude: '24.9452124',
                 limit: '30',
-                currency: 'USD',
                 distance: '2',
                 open_now: 'false',
                 lunit: 'km',
@@ -21,14 +20,14 @@ export default function Randomizer (props) {
             },
         }).then(
             res => {
-                console.log(res.data.data);
+                setRestaurantList(res.data.data);
             }
         ).catch( e => {
             console.error(e);
         })
     },[])
 
-    return (
-        <span>{restaurantList[Math.round(Math.random()*9)]}</span>
-    )
+    return restaurantList.length ?
+        <h1>{restaurantList[Math.round(Math.random() * 32)].name}</h1>
+        : <span>nothing, sorry</span>
 }
