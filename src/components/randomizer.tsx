@@ -4,7 +4,7 @@ import axios from "axios";
 
 export default function Randomizer () {
     const [restaurantList, setRestaurantList] = useState<any[]>([]);
-    const [responseLimit, setResponseLimit] = useState<number>(100);
+    const [randomLimit, setRandomLimit] = useState<number>(100);
     const [isLoading, setLoading] = useState<boolean>(true);
     const [chosenOne, setChosenOne] = useState<any>({});
 
@@ -18,7 +18,7 @@ export default function Randomizer () {
                 params: {
                     latitude: lat,
                     longitude: lon,
-                    limit: responseLimit,
+                    limit: '1000',
                     distance: '1',
                     open_now: 'false',
                     lunit: 'km',
@@ -26,7 +26,7 @@ export default function Randomizer () {
                 },
             }).then(
                 res => {
-                    setResponseLimit(res.data.paging.total_results);
+                    setRandomLimit(res.data.paging.total_results);
                     setRestaurantList(res.data.data);
                 }
             ).catch( e => {
@@ -45,13 +45,13 @@ export default function Randomizer () {
 
     useEffect(() => {
         if(restaurantList.length)
-            setChosenOne(restaurantList[Math.round(Math.random() * responseLimit)])
-    }, [responseLimit])
+            setChosenOne(restaurantList[Math.round(Math.random() * randomLimit)])
+    }, [randomLimit])
 
     return !isLoading && chosenOne?
         <>
             <h1>{chosenOne.name}</h1>
-            <p>Found {responseLimit} restaurants</p>
+            <p>Found {randomLimit} restaurants</p>
         </>
         : <span>still looking</span>
 }
