@@ -26,8 +26,8 @@ export default function Randomizer () {
                 },
             }).then(
                 res => {
-                    setRandomLimit(res.data.paging.total_results);
                     setRestaurantList(res.data.data);
+                    setRandomLimit(Number(res.data.paging.results));
                 }
             ).catch( e => {
                 console.error(e);
