@@ -5,7 +5,6 @@ import RandomForm from "./randomForm";
 import {RequestParam} from "../models/requestParam";
 
 export default function Randomizer () {
-    const [restaurantList, setRestaurantList] = useState<any[]>([]);
     const [isLoading, setLoading] = useState<boolean>(true);
     const [chosenOne, setChosenOne] = useState<any>({});
     const [requestParam, setRequestParam] = useState<RequestParam>({
@@ -30,21 +29,14 @@ export default function Randomizer () {
             fetchRestaurants()
     }, [requestParam])
 
-    useEffect(() => {
-        if(restaurantList.length)
-            setChosenOne(restaurantList[Math.round(Math.random() * randomLimit)])
-    }, [restaurantList])
-
-
     const fetchRestaurants = () => {
-        console.log('fetching')
         axios({
             ...options,
             url: 'https://travel-advisor.p.rapidapi.com/restaurants/list-by-latlng',
             params: requestParam,
         }).then(
             res => {
-                setRestaurantList(res.data.data);
+                setChosenOne(res.data.data[Math.round(Math.random() * res.data.data.length)]);
             }
         ).catch( e => {
             console.error(e);
@@ -72,7 +64,7 @@ export default function Randomizer () {
     }
 
     return <>
-        {!isLoading && chosenOne?.name ?
+        {!isLoading && chosenOne.name ?
             <>
                 <h1>{chosenOne.name}</h1>
             </>
