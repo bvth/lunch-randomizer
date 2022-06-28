@@ -8,8 +8,6 @@ export default function Randomizer () {
     const [isLoading, setLoading] = useState<boolean>(true);
     const [chosenOne, setChosenOne] = useState<any>({});
     const [requestParam, setRequestParam] = useState<RequestParam>({
-        latitude: NaN,
-        longitude: NaN,
         limit: '1000',
         distance: '1',
         open_now: 'true',
@@ -17,8 +15,6 @@ export default function Randomizer () {
         lang: 'en_US',
         min_rating: '4'
     })
-
-    const randomLimit = 30;
 
     useEffect(() => {
         getUserLocation();
@@ -63,12 +59,19 @@ export default function Randomizer () {
         navigator.geolocation.getCurrentPosition(success, error);
     }
 
+    const submitForm = (body: RequestParam) => {
+        setRequestParam({
+            ...requestParam,
+            ...body
+        })
+    }
+
     return <>
         {!isLoading && chosenOne.name ?
             <>
                 <h1>{chosenOne.name}</h1>
             </>
             : <span>still looking</span>}
-        <RandomForm/>
+        <RandomForm submit={submitForm}/>
     </>
 }
