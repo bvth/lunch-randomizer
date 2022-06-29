@@ -1,6 +1,6 @@
 export interface RequestParam {
-    latitude?: number;
-    longitude?: number;
+    latitude?: string;
+    longitude?: string;
     limit?: string;
     distance?: string;
     open_now?: string;

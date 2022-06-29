@@ -4,6 +4,8 @@ import axios from "axios";
 import RandomForm from "./randomForm";
 import {RequestParam} from "../models/requestParam";
 
+type FormBody = {street: string; city: string, buildingNumber: number; requestParam: RequestParam};
+
 export default function Randomizer () {
     const [isLoading, setLoading] = useState<boolean>(true);
     const [chosenOne, setChosenOne] = useState<any>({});
@@ -15,6 +17,7 @@ export default function Randomizer () {
         lang: 'en_US',
         min_rating: '4'
     })
+    const [error, setError] = useState<string>('');
 
     useEffect(() => {
         getUserLocation();
@@ -26,13 +29,17 @@ export default function Randomizer () {
     }, [requestParam])
 
     const fetchRestaurants = () => {
+        setError('')
         axios({
             ...options,
             url: 'https://travel-advisor.p.rapidapi.com/restaurants/list-by-latlng',
             params: requestParam,
         }).then(
             res => {
-                setChosenOne(res.data.data[Math.round(Math.random() * res.data.data.length)]);
+                if(res.data.data.length)
+                    setChosenOne(res.data.data[Math.round(Math.random() * res.data.data.length)]);
+                else
+                    setError('Found nothing');
             }
         ).catch( e => {
             console.error(e);
@@ -47,8 +54,8 @@ export default function Randomizer () {
             let lon = position.coords.longitude;
             setRequestParam({
                 ...requestParam,
-                latitude: lat,
-                longitude: lon
+                latitude: String(lat),
+                longitude: String(lon)
             })
         }
 
@@ -59,18 +66,37 @@ export default function Randomizer () {
         navigator.geolocation.getCurrentPosition(success, error);
     }
 
-    const submitForm = (body: RequestParam) => {
-        setRequestParam({
-            ...requestParam,
-            ...body
-        })
+    const submitForm = (formBody: FormBody) => {
+        if(formBody.street && formBody.buildingNumber && formBody.city)
+            findCoordsFromAddress(formBody)
+        else
+            setRequestParam({
+                ...requestParam,
+                ...formBody.requestParam
+            })
+    }
+
+    const findCoordsFromAddress = (formBody: FormBody) => {
+        let {buildingNumber, street, city} = formBody;
+        axios({
+            method: "GET",
+            url: `https://nominatim.openstreetmap.org/?addressdetails=1&street=${buildingNumber}+${street}&city=${city}&format=json`
+        }).then(
+            res => {
+                let data = res.data[0];
+                setRequestParam({
+                    ...requestParam,
+                    ...formBody.requestParam,
+                    latitude: data.lat,
+                    longitude: data.lon,
+                })
+            }
+        )
     }
 
     return <>
-        {!isLoading && chosenOne.name ?
-            <>
-                <h1>{chosenOne.name}</h1>
-            </>
+        {!isLoading ?
+            <h1>{error || chosenOne.name}</h1>
             : <span>still looking</span>}
         <RandomForm submit={submitForm}/>
     </>
